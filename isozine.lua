@@ -1,264 +1,400 @@
 local RoIso = {}
 RoIso.__index = RoIso
 
-local Config = {
-	WindowBgColor = Color3.fromRGB(20, 20, 25),
-	WindowBgTransparency = 0.05,
-	TitleBarColor = Color3.fromRGB(40, 40, 50),
-	TabColor = Color3.fromRGB(35, 35, 45),
-	TabActiveColor = Color3.fromRGB(60, 120, 200),
-	ButtonColor = Color3.fromRGB(60, 60, 70),
-	ButtonHoverColor = Color3.fromRGB(80, 80, 90),
-	ButtonActiveColor = Color3.fromRGB(100, 100, 110),
-	TextColor = Color3.fromRGB(255, 255, 255),
-	Padding = 8,
-	ItemSpacing = 4,
-	TitleBarHeight = 30,
-	TabHeight = 35,
+local cfg = {
+	bg = Color3.fromRGB(15, 15, 18),
+	title = Color3.fromRGB(25, 25, 30),
+	tab = Color3.fromRGB(20, 20, 24),
+	tabActive = Color3.fromRGB(45, 100, 180),
+	btn = Color3.fromRGB(35, 35, 42),
+	btnHover = Color3.fromRGB(45, 45, 55),
+	btnActive = Color3.fromRGB(55, 55, 65),
+	accent = Color3.fromRGB(60, 130, 220),
+	text = Color3.fromRGB(240, 240, 245),
+	textDim = Color3.fromRGB(160, 160, 170),
 }
 
-function RoIso.new(title, size, position)
+function RoIso.new(name, sz, pos)
 	local self = setmetatable({}, RoIso)
+	sz = sz or Vector2.new(480, 380)
+	pos = pos or Vector2.new(100, 100)
 	
-	self.ScreenGui = Instance.new("ScreenGui")
-	self.ScreenGui.Name = "RoIso_" .. title
-	self.ScreenGui.ResetOnSpawn = false
-	self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	self.ScreenGui.IgnoreGuiInset = true
-	
-	local success = pcall(function()
-		self.ScreenGui.Parent = game:GetService("CoreGui")
-	end)
-	if not success then
-		self.ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+	self.sg = Instance.new("ScreenGui")
+	self.sg.Name = "RoIso"
+	self.sg.ResetOnSpawn = false
+	self.sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	pcall(function() self.sg.Parent = game:GetService("CoreGui") end)
+	if not self.sg.Parent then 
+		self.sg.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui") 
 	end
 	
-	self.Tabs = {}
-	self.ActiveTab = nil
-	self.UnhookPosition = nil
+	self.tabs = {}
+	self.active = nil
 	
-	size = size or Vector2.new(500, 400)
-	position = position or Vector2.new(100, 100)
+	local f = Instance.new("Frame")
+	f.Size = UDim2.new(0, sz.X, 0, sz.Y)
+	f.Position = UDim2.new(0, pos.X, 0, pos.Y)
+	f.BackgroundColor3 = cfg.bg
+	f.BorderSizePixel = 0
+	f.Active = true
+	f.Draggable = true
+	f.Parent = self.sg
+	self.main = f
 	
-	self.MainFrame = Instance.new("Frame")
-	self.MainFrame.Name = "MainFrame"
-	self.MainFrame.Size = UDim2.new(0, size.X, 0, size.Y)
-	self.MainFrame.Position = UDim2.new(0, position.X, 0, position.Y)
-	self.MainFrame.BackgroundColor3 = Config.WindowBgColor
-	self.MainFrame.BackgroundTransparency = Config.WindowBgTransparency
-	self.MainFrame.BorderSizePixel = 0
-	self.MainFrame.Active = true
-	self.MainFrame.Draggable = true
-	self.MainFrame.Parent = self.ScreenGui
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 6)
+	c.Parent = f
 	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 8)
-	corner.Parent = self.MainFrame
+	local t = Instance.new("Frame")
+	t.Size = UDim2.new(1, 0, 0, 28)
+	t.BackgroundColor3 = cfg.title
+	t.BorderSizePixel = 0
+	t.Parent = f
 	
-	self.TitleBar = Instance.new("Frame")
-	self.TitleBar.Name = "TitleBar"
-	self.TitleBar.Size = UDim2.new(1, 0, 0, Config.TitleBarHeight)
-	self.TitleBar.BackgroundColor3 = Config.TitleBarColor
-	self.TitleBar.BorderSizePixel = 0
-	self.TitleBar.Parent = self.MainFrame
+	local tc = Instance.new("UICorner")
+	tc.CornerRadius = UDim.new(0, 6)
+	tc.Parent = t
 	
-	local titleCorner = Instance.new("UICorner")
-	titleCorner.CornerRadius = UDim.new(0, 8)
-	titleCorner.Parent = self.TitleBar
+	local th = Instance.new("Frame")
+	th.Size = UDim2.new(1, 0, 0, 6)
+	th.Position = UDim2.new(0, 0, 1, -6)
+	th.BackgroundColor3 = cfg.title
+	th.BorderSizePixel = 0
+	th.Parent = t
 	
-	local titleHider = Instance.new("Frame")
-	titleHider.Size = UDim2.new(1, 0, 0, 8)
-	titleHider.Position = UDim2.new(0, 0, 1, -8)
-	titleHider.BackgroundColor3 = Config.TitleBarColor
-	titleHider.BorderSizePixel = 0
-	titleHider.Parent = self.TitleBar
+	local tl = Instance.new("TextLabel")
+	tl.Size = UDim2.new(1, -20, 1, 0)
+	tl.Position = UDim2.new(0, 10, 0, 0)
+	tl.BackgroundTransparency = 1
+	tl.Text = name
+	tl.TextColor3 = cfg.text
+	tl.TextSize = 14
+	tl.Font = Enum.Font.GothamBold
+	tl.TextXAlignment = Enum.TextXAlignment.Left
+	tl.Parent = t
 	
-	self.TitleLabel = Instance.new("TextLabel")
-	self.TitleLabel.Name = "Title"
-	self.TitleLabel.Size = UDim2.new(1, -16, 1, 0)
-	self.TitleLabel.Position = UDim2.new(0, 12, 0, 0)
-	self.TitleLabel.BackgroundTransparency = 1
-	self.TitleLabel.Text = title
-	self.TitleLabel.TextColor3 = Config.TextColor
-	self.TitleLabel.TextSize = 16
-	self.TitleLabel.Font = Enum.Font.GothamBold
-	self.TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	self.TitleLabel.Parent = self.TitleBar
+	local tc = Instance.new("Frame")
+	tc.Size = UDim2.new(1, 0, 0, 32)
+	tc.Position = UDim2.new(0, 0, 0, 28)
+	tc.BackgroundColor3 = cfg.tab
+	tc.BorderSizePixel = 0
+	tc.Parent = f
+	self.tabCont = tc
 	
-	self.TabContainer = Instance.new("Frame")
-	self.TabContainer.Name = "TabContainer"
-	self.TabContainer.Size = UDim2.new(1, 0, 0, Config.TabHeight)
-	self.TabContainer.Position = UDim2.new(0, 0, 0, Config.TitleBarHeight)
-	self.TabContainer.BackgroundColor3 = Config.TabColor
-	self.TabContainer.BorderSizePixel = 0
-	self.TabContainer.Parent = self.MainFrame
+	local tl = Instance.new("UIListLayout")
+	tl.FillDirection = Enum.FillDirection.Horizontal
+	tl.Padding = UDim.new(0, 1)
+	tl.Parent = tc
 	
-	local tabLayout = Instance.new("UIListLayout")
-	tabLayout.FillDirection = Enum.FillDirection.Horizontal
-	tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	tabLayout.Padding = UDim.new(0, 2)
-	tabLayout.Parent = self.TabContainer
-	
-	self.ContentFrame = Instance.new("ScrollingFrame")
-	self.ContentFrame.Name = "ContentFrame"
-	self.ContentFrame.Size = UDim2.new(1, 0, 1, -(Config.TitleBarHeight + Config.TabHeight))
-	self.ContentFrame.Position = UDim2.new(0, 0, 0, Config.TitleBarHeight + Config.TabHeight)
-	self.ContentFrame.BackgroundTransparency = 1
-	self.ContentFrame.BorderSizePixel = 0
-	self.ContentFrame.ScrollBarThickness = 6
-	self.ContentFrame.ScrollBarImageColor3 = Config.ButtonColor
-	self.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-	self.ContentFrame.Parent = self.MainFrame
+	local s = Instance.new("ScrollingFrame")
+	s.Size = UDim2.new(1, -16, 1, -68)
+	s.Position = UDim2.new(0, 8, 0, 60)
+	s.BackgroundTransparency = 1
+	s.BorderSizePixel = 0
+	s.ScrollBarThickness = 4
+	s.ScrollBarImageColor3 = cfg.btnHover
+	s.CanvasSize = UDim2.new(0, 0, 0, 0)
+	s.Parent = f
+	self.scroll = s
 	
 	return self
 end
 
-function RoIso:AddTab(name)
-	if self.Tabs[name] then return end
+function RoIso:AddTab(n)
+	if self.tabs[n] then return end
 	
-	local tab = {}
-	tab.Name = name
-	tab.Buttons = {}
-	tab.CursorY = Config.Padding
+	local tab = {name = n, items = {}, y = 0}
 	
-	tab.Frame = Instance.new("Frame")
-	tab.Frame.Name = name
-	tab.Frame.Size = UDim2.new(1, -Config.Padding * 2, 1, 0)
-	tab.Frame.Position = UDim2.new(0, Config.Padding, 0, 0)
-	tab.Frame.BackgroundTransparency = 1
-	tab.Frame.Visible = false
-	tab.Frame.Parent = self.ContentFrame
+	local f = Instance.new("Frame")
+	f.Name = n
+	f.Size = UDim2.new(1, 0, 1, 0)
+	f.BackgroundTransparency = 1
+	f.Visible = false
+	f.Parent = self.scroll
+	tab.frame = f
 	
-	local layout = Instance.new("UIListLayout")
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, Config.ItemSpacing)
-	layout.Parent = tab.Frame
+	local b = Instance.new("TextButton")
+	b.Name = n
+	b.Size = UDim2.new(0, 90, 1, 0)
+	b.BackgroundColor3 = cfg.tab
+	b.BorderSizePixel = 0
+	b.Text = n
+	b.TextColor3 = cfg.text
+	b.TextSize = 13
+	b.Font = Enum.Font.GothamMedium
+	b.AutoButtonColor = false
+	b.Parent = self.tabCont
+	tab.btn = b
 	
-	local tabButton = Instance.new("TextButton")
-	tabButton.Name = name
-	tabButton.Size = UDim2.new(0, 100, 1, 0)
-	tabButton.BackgroundColor3 = Config.TabColor
-	tabButton.BorderSizePixel = 0
-	tabButton.Text = name
-	tabButton.TextColor3 = Config.TextColor
-	tabButton.TextSize = 14
-	tabButton.Font = Enum.Font.GothamMedium
-	tabButton.Parent = self.TabContainer
-	
-	tabButton.MouseButton1Click:Connect(function()
-		self:SwitchTab(name)
+	b.MouseButton1Click:Connect(function()
+		for _, t in pairs(self.tabs) do
+			t.frame.Visible = false
+			t.btn.BackgroundColor3 = cfg.tab
+		end
+		f.Visible = true
+		b.BackgroundColor3 = cfg.tabActive
+		self.active = n
 	end)
 	
-	tab.Button = tabButton
-	self.Tabs[name] = tab
-	
-	if not self.ActiveTab then
-		self:SwitchTab(name)
+	self.tabs[n] = tab
+	if not self.active then
+		f.Visible = true
+		b.BackgroundColor3 = cfg.tabActive
+		self.active = n
 	end
 end
 
-function RoIso:SwitchTab(name)
-	if not self.Tabs[name] then return end
+function RoIso:AddButton(tab, txt, cb)
+	local t = self.tabs[tab]
+	if not t then warn("Tab '" .. tab .. "' doesnt exist") return end
 	
-	for tabName, tab in pairs(self.Tabs) do
-		tab.Frame.Visible = false
-		tab.Button.BackgroundColor3 = Config.TabColor
-	end
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1, 0, 0, 32)
+	b.Position = UDim2.new(0, 0, 0, t.y)
+	b.BackgroundColor3 = cfg.btn
+	b.BorderSizePixel = 0
+	b.Text = txt
+	b.TextColor3 = cfg.text
+	b.TextSize = 13
+	b.Font = Enum.Font.Gotham
+	b.AutoButtonColor = false
+	b.Parent = t.frame
 	
-	self.Tabs[name].Frame.Visible = true
-	self.Tabs[name].Button.BackgroundColor3 = Config.TabActiveColor
-	self.ActiveTab = name
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 4)
+	c.Parent = b
+	
+	b.MouseEnter:Connect(function() b.BackgroundColor3 = cfg.btnHover end)
+	b.MouseLeave:Connect(function() b.BackgroundColor3 = cfg.btn end)
+	b.MouseButton1Down:Connect(function() b.BackgroundColor3 = cfg.btnActive end)
+	b.MouseButton1Up:Connect(function() b.BackgroundColor3 = cfg.btnHover end)
+	b.MouseButton1Click:Connect(function() if cb then cb() end end)
+	
+	t.y = t.y + 36
+	self.scroll.CanvasSize = UDim2.new(0, 0, 0, t.y)
 end
 
-function RoIso:AddButton(tabName, buttonText, callback)
-	local tab = self.Tabs[tabName]
-	if not tab then
-		warn("Tab '" .. tabName .. "' does not exist. Create it first with AddTab()")
-		return
-	end
+function RoIso:AddToggle(tab, txt, def, cb)
+	local t = self.tabs[tab]
+	if not t then warn("Tab '" .. tab .. "' doesnt exist") return end
 	
-	local btn = Instance.new("TextButton")
-	btn.Name = buttonText
-	btn.Size = UDim2.new(1, 0, 0, 35)
-	btn.BackgroundColor3 = Config.ButtonColor
-	btn.BorderSizePixel = 0
-	btn.Text = buttonText
-	btn.TextColor3 = Config.TextColor
-	btn.TextSize = 14
-	btn.Font = Enum.Font.Gotham
-	btn.AutoButtonColor = false
-	btn.Parent = tab.Frame
+	local state = def or false
 	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 6)
-	corner.Parent = btn
+	local f = Instance.new("Frame")
+	f.Size = UDim2.new(1, 0, 0, 32)
+	f.Position = UDim2.new(0, 0, 0, t.y)
+	f.BackgroundColor3 = cfg.btn
+	f.BorderSizePixel = 0
+	f.Parent = t.frame
 	
-	btn.MouseEnter:Connect(function()
-		btn.BackgroundColor3 = Config.ButtonHoverColor
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 4)
+	c.Parent = f
+	
+	local l = Instance.new("TextLabel")
+	l.Size = UDim2.new(1, -50, 1, 0)
+	l.Position = UDim2.new(0, 10, 0, 0)
+	l.BackgroundTransparency = 1
+	l.Text = txt
+	l.TextColor3 = cfg.text
+	l.TextSize = 13
+	l.Font = Enum.Font.Gotham
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Parent = f
+	
+	local tb = Instance.new("TextButton")
+	tb.Size = UDim2.new(0, 36, 0, 18)
+	tb.Position = UDim2.new(1, -42, 0.5, -9)
+	tb.BackgroundColor3 = state and cfg.accent or cfg.btnActive
+	tb.BorderSizePixel = 0
+	tb.Text = ""
+	tb.AutoButtonColor = false
+	tb.Parent = f
+	
+	local tc = Instance.new("UICorner")
+	tc.CornerRadius = UDim.new(1, 0)
+	tc.Parent = tb
+	
+	local k = Instance.new("Frame")
+	k.Size = UDim2.new(0, 14, 0, 14)
+	k.Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
+	k.BackgroundColor3 = cfg.text
+	k.BorderSizePixel = 0
+	k.Parent = tb
+	
+	local kc = Instance.new("UICorner")
+	kc.CornerRadius = UDim.new(1, 0)
+	kc.Parent = k
+	
+	tb.MouseButton1Click:Connect(function()
+		state = not state
+		tb.BackgroundColor3 = state and cfg.accent or cfg.btnActive
+		game:GetService("TweenService"):Create(k, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+			Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
+		}):Play()
+		if cb then cb(state) end
 	end)
 	
-	btn.MouseLeave:Connect(function()
-		btn.BackgroundColor3 = Config.ButtonColor
+	t.y = t.y + 36
+	self.scroll.CanvasSize = UDim2.new(0, 0, 0, t.y)
+end
+
+function RoIso:AddSlider(tab, txt, min, max, def, cb)
+	local t = self.tabs[tab]
+	if not t then warn("Tab '" .. tab .. "' doesnt exist") return end
+	
+	local val = def or min
+	
+	local f = Instance.new("Frame")
+	f.Size = UDim2.new(1, 0, 0, 48)
+	f.Position = UDim2.new(0, 0, 0, t.y)
+	f.BackgroundColor3 = cfg.btn
+	f.BorderSizePixel = 0
+	f.Parent = t.frame
+	
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 4)
+	c.Parent = f
+	
+	local l = Instance.new("TextLabel")
+	l.Size = UDim2.new(1, -20, 0, 20)
+	l.Position = UDim2.new(0, 10, 0, 4)
+	l.BackgroundTransparency = 1
+	l.Text = txt
+	l.TextColor3 = cfg.text
+	l.TextSize = 13
+	l.Font = Enum.Font.Gotham
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Parent = f
+	
+	local vl = Instance.new("TextLabel")
+	vl.Size = UDim2.new(0, 50, 0, 20)
+	vl.Position = UDim2.new(1, -60, 0, 4)
+	vl.BackgroundTransparency = 1
+	vl.Text = tostring(val)
+	vl.TextColor3 = cfg.accent
+	vl.TextSize = 13
+	vl.Font = Enum.Font.GothamBold
+	vl.TextXAlignment = Enum.TextXAlignment.Right
+	vl.Parent = f
+	
+	local sb = Instance.new("Frame")
+	sb.Size = UDim2.new(1, -20, 0, 6)
+	sb.Position = UDim2.new(0, 10, 1, -14)
+	sb.BackgroundColor3 = cfg.btnActive
+	sb.BorderSizePixel = 0
+	sb.Parent = f
+	
+	local sbc = Instance.new("UICorner")
+	sbc.CornerRadius = UDim.new(1, 0)
+	sbc.Parent = sb
+	
+	local sf = Instance.new("Frame")
+	sf.Size = UDim2.new((val - min) / (max - min), 0, 1, 0)
+	sf.BackgroundColor3 = cfg.accent
+	sf.BorderSizePixel = 0
+	sf.Parent = sb
+	
+	local sfc = Instance.new("UICorner")
+	sfc.CornerRadius = UDim.new(1, 0)
+	sfc.Parent = sf
+	
+	local drag = false
+	sb.InputBegan:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = true end
+	end)
+	sb.InputEnded:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = false end
 	end)
 	
-	btn.MouseButton1Down:Connect(function()
-		btn.BackgroundColor3 = Config.ButtonActiveColor
-	end)
-	
-	btn.MouseButton1Up:Connect(function()
-		btn.BackgroundColor3 = Config.ButtonHoverColor
-	end)
-	
-	btn.MouseButton1Click:Connect(function()
-		if callback then
-			callback()
+	game:GetService("UserInputService").InputChanged:Connect(function(i)
+		if drag and i.UserInputType == Enum.UserInputType.MouseMovement then
+			local x = math.clamp((i.Position.X - sb.AbsolutePosition.X) / sb.AbsoluteSize.X, 0, 1)
+			val = math.floor(min + (max - min) * x)
+			vl.Text = tostring(val)
+			sf.Size = UDim2.new(x, 0, 1, 0)
+			if cb then cb(val) end
 		end
 	end)
 	
-	table.insert(tab.Buttons, btn)
-	
-	local contentSize = #tab.Buttons * (35 + Config.ItemSpacing) + Config.Padding
-	self.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, contentSize)
+	t.y = t.y + 52
+	self.scroll.CanvasSize = UDim2.new(0, 0, 0, t.y)
 end
 
-function RoIso:Unhook(position)
-	self.UnhookPosition = position or Vector2.new(10, 10)
+function RoIso:AddTextbox(tab, txt, def, cb)
+	local t = self.tabs[tab]
+	if not t then warn("Tab '" .. tab .. "' doesnt exist") return end
 	
-	local unhookBtn = Instance.new("TextButton")
-	unhookBtn.Name = "UnhookButton"
-	unhookBtn.Size = UDim2.new(0, 100, 0, 30)
-	unhookBtn.Position = UDim2.new(0, self.UnhookPosition.X, 0, self.UnhookPosition.Y)
-	unhookBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-	unhookBtn.BorderSizePixel = 0
-	unhookBtn.Text = "Unload"
-	unhookBtn.TextColor3 = Config.TextColor
-	unhookBtn.TextSize = 14
-	unhookBtn.Font = Enum.Font.GothamBold
-	unhookBtn.ZIndex = 10
-	unhookBtn.Parent = self.MainFrame
+	local f = Instance.new("Frame")
+	f.Size = UDim2.new(1, 0, 0, 32)
+	f.Position = UDim2.new(0, 0, 0, t.y)
+	f.BackgroundColor3 = cfg.btn
+	f.BorderSizePixel = 0
+	f.Parent = t.frame
 	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 6)
-	corner.Parent = unhookBtn
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 4)
+	c.Parent = f
 	
-	unhookBtn.MouseEnter:Connect(function()
-		unhookBtn.BackgroundColor3 = Color3.fromRGB(220, 80, 80)
+	local l = Instance.new("TextLabel")
+	l.Size = UDim2.new(0, 80, 1, 0)
+	l.Position = UDim2.new(0, 10, 0, 0)
+	l.BackgroundTransparency = 1
+	l.Text = txt
+	l.TextColor3 = cfg.text
+	l.TextSize = 13
+	l.Font = Enum.Font.Gotham
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Parent = f
+	
+	local tb = Instance.new("TextBox")
+	tb.Size = UDim2.new(1, -100, 0, 24)
+	tb.Position = UDim2.new(0, 94, 0, 4)
+	tb.BackgroundColor3 = cfg.btnActive
+	tb.BorderSizePixel = 0
+	tb.Text = def or ""
+	tb.PlaceholderText = "Enter text..."
+	tb.TextColor3 = cfg.text
+	tb.PlaceholderColor3 = cfg.textDim
+	tb.TextSize = 12
+	tb.Font = Enum.Font.Gotham
+	tb.ClearTextOnFocus = false
+	tb.Parent = f
+	
+	local tbc = Instance.new("UICorner")
+	tbc.CornerRadius = UDim.new(0, 3)
+	tbc.Parent = tb
+	
+	tb.FocusLost:Connect(function()
+		if cb then cb(tb.Text) end
 	end)
 	
-	unhookBtn.MouseLeave:Connect(function()
-		unhookBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-	end)
-	
-	unhookBtn.MouseButton1Click:Connect(function()
-		self:Destroy()
-	end)
+	t.y = t.y + 36
+	self.scroll.CanvasSize = UDim2.new(0, 0, 0, t.y)
 end
 
-function RoIso:Destroy()
-	if self.ScreenGui then
-		self.ScreenGui:Destroy()
-	end
-	setmetatable(self, nil)
+function RoIso:Unhook(pos)
+	pos = pos or Vector2.new(10, 10)
+	
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(0, 80, 0, 24)
+	b.Position = UDim2.new(0, pos.X, 0, pos.Y)
+	b.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+	b.BorderSizePixel = 0
+	b.Text = "Unload"
+	b.TextColor3 = cfg.text
+	b.TextSize = 12
+	b.Font = Enum.Font.GothamBold
+	b.ZIndex = 10
+	b.Parent = self.main
+	
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 4)
+	c.Parent = b
+	
+	b.MouseEnter:Connect(function() b.BackgroundColor3 = Color3.fromRGB(200, 70, 70) end)
+	b.MouseLeave:Connect(function() b.BackgroundColor3 = Color3.fromRGB(180, 50, 50) end)
+	b.MouseButton1Click:Connect(function() self.sg:Destroy() end)
 end
 
 return RoIso
