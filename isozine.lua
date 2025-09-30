@@ -1,345 +1,439 @@
-local Isozine = {Windows = {}, ActiveWindow = nil, DragData = {}, InputFocus = nil}
+local Lib = {}
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 local RS = game:GetService("RunService")
 
-local function Create(class, props)
-    local obj = Instance.new(class)
-    for k, v in pairs(props) do
-        if k ~= "Parent" then obj[k] = v end
-    end
-    obj.Parent = props.Parent
-    return obj
+local C = {
+    WindowBg = Color3.fromRGB(15, 15, 15),
+    TitleBg = Color3.fromRGB(10, 10, 10),
+    TitleBgActive = Color3.fromRGB(16, 29, 46),
+    Border = Color3.fromRGB(43, 43, 43),
+    FrameBg = Color3.fromRGB(41, 74, 122),
+    FrameBgHovered = Color3.fromRGB(66, 150, 250),
+    FrameBgActive = Color3.fromRGB(66, 150, 250),
+    Button = Color3.fromRGB(66, 150, 250),
+    ButtonHovered = Color3.fromRGB(66, 150, 250),
+    ButtonActive = Color3.fromRGB(6, 53, 98),
+    CheckMark = Color3.fromRGB(66, 150, 250),
+    SliderGrab = Color3.fromRGB(66, 150, 250),
+    SliderGrabActive = Color3.fromRGB(66, 150, 250),
+    Text = Color3.fromRGB(255, 255, 255),
+    TextDisabled = Color3.fromRGB(128, 128, 128),
+    Header = Color3.fromRGB(66, 150, 250),
+    HeaderHovered = Color3.fromRGB(66, 150, 250),
+    HeaderActive = Color3.fromRGB(66, 150, 250),
+    Separator = Color3.fromRGB(110, 110, 128),
+    ScrollbarBg = Color3.fromRGB(5, 5, 5),
+    ScrollbarGrab = Color3.fromRGB(79, 79, 79),
+}
+
+local function C3(r, g, b) return Color3.fromRGB(r, g, b) end
+
+local function Inst(c, p)
+    local o = Instance.new(c)
+    for k, v in pairs(p) do if k ~= "Parent" then o[k] = v end end
+    o.Parent = p.Parent
+    return o
 end
 
-local function Tween(obj, props, time)
-    TS:Create(obj, TweenInfo.new(time or 0.15, Enum.EasingStyle.Quad), props):Play()
-end
-
-function Isozine:CreateWindow(title, size)
-    local gui = Create("ScreenGui", {
-        Name = "IsozineGui",
-        Parent = game:GetService("CoreGui"),
-        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        ResetOnSpawn = false
-    })
+function Lib:Begin(t, s)
+    local sg = Inst("ScreenGui", {Name = "ImGui", Parent = game.CoreGui, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, ResetOnSpawn = false})
     
-    local window = Create("Frame", {
+    local w = Inst("Frame", {
         Name = "Window",
-        Parent = gui,
-        Size = UDim2.new(0, size.X or 500, 0, size.Y or 400),
-        Position = UDim2.new(0.5, -(size.X or 500)/2, 0.5, -(size.Y or 400)/2),
-        BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+        Parent = sg,
+        Size = UDim2.new(0, s.X or 400, 0, s.Y or 300),
+        Position = UDim2.new(0.5, -(s.X or 400)/2, 0.5, -(s.Y or 300)/2),
+        BackgroundColor3 = C.WindowBg,
+        BorderColor3 = C.Border,
+        BorderSizePixel = 1
+    })
+    
+    local tb = Inst("Frame", {
+        Name = "TitleBar",
+        Parent = w,
+        Size = UDim2.new(1, 0, 0, 19),
+        BackgroundColor3 = C.TitleBg,
         BorderSizePixel = 0
     })
     
-    Create("UICorner", {Parent = window, CornerRadius = UDim.new(0, 6)})
-    
-    local header = Create("Frame", {
-        Name = "Header",
-        Parent = window,
-        Size = UDim2.new(1, 0, 0, 30),
-        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
-        BorderSizePixel = 0
-    })
-    
-    Create("UICorner", {Parent = header, CornerRadius = UDim.new(0, 6)})
-    
-    local titleLabel = Create("TextLabel", {
-        Parent = header,
-        Size = UDim2.new(1, -10, 1, 0),
-        Position = UDim2.new(0, 10, 0, 0),
+    Inst("TextLabel", {
+        Parent = tb,
+        Size = UDim2.new(1, -8, 1, 0),
+        Position = UDim2.new(0, 8, 0, 0),
         BackgroundTransparency = 1,
-        Text = title,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        TextSize = 14,
-        Font = Enum.Font.GothamBold,
+        Text = t,
+        TextColor3 = C.Text,
+        TextSize = 13,
+        Font = Enum.Font.SourceSans,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
-    local content = Create("ScrollingFrame", {
+    local close = Inst("TextButton", {
+        Parent = tb,
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(1, -18, 0, 2),
+        BackgroundColor3 = C3(140, 20, 20),
+        BorderSizePixel = 0,
+        Text = "X",
+        TextColor3 = C.Text,
+        TextSize = 12,
+        Font = Enum.Font.SourceSansBold
+    })
+    
+    close.MouseButton1Click:Connect(function() sg:Destroy() end)
+    
+    local cont = Inst("ScrollingFrame", {
         Name = "Content",
-        Parent = window,
-        Size = UDim2.new(1, -10, 1, -40),
-        Position = UDim2.new(0, 5, 0, 35),
+        Parent = w,
+        Size = UDim2.new(1, -16, 1, -27),
+        Position = UDim2.new(0, 8, 0, 23),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        ScrollBarThickness = 4,
+        ScrollBarThickness = 12,
         CanvasSize = UDim2.new(0, 0, 0, 0),
-        ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
+        ScrollBarImageColor3 = C.ScrollbarGrab
     })
     
-    Create("UIListLayout", {
-        Parent = content,
-        Padding = UDim.new(0, 5),
-        SortOrder = Enum.SortOrder.LayoutOrder
-    })
+    Inst("UIListLayout", {Parent = cont, Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder})
     
-    local dragging, dragStart, startPos
-    header.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = window.Position
+    local drag, dstart, spos
+    tb.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            drag = true
+            dstart = i.Position
+            spos = w.Position
+            tb.BackgroundColor3 = C.TitleBgActive
         end
     end)
     
-    UIS.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    UIS.InputChanged:Connect(function(i)
+        if drag and i.UserInputType == Enum.UserInputType.MouseMovement then
+            local d = i.Position - dstart
+            w.Position = UDim2.new(spos.X.Scale, spos.X.Offset + d.X, spos.Y.Scale, spos.Y.Offset + d.Y)
         end
     end)
     
-    UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
+    UIS.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            drag = false
+            tb.BackgroundColor3 = C.TitleBg
         end
     end)
     
-    local windowObj = {
-        Gui = gui,
-        Window = window,
-        Content = content,
-        Elements = {}
-    }
-    
-    table.insert(self.Windows, windowObj)
-    return windowObj
+    return {G = sg, W = w, C = cont}
 end
 
-function Isozine:Button(window, text, callback)
-    local btn = Create("TextButton", {
-        Parent = window.Content,
-        Size = UDim2.new(1, -10, 0, 30),
-        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-        Text = text,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
+function Lib:Button(w, txt, cb)
+    local b = Inst("TextButton", {
+        Parent = w.C,
+        Size = UDim2.new(1, -8, 0, 19),
+        BackgroundColor3 = C.Button,
+        BorderSizePixel = 0,
+        Text = txt,
+        TextColor3 = C.Text,
         TextSize = 13,
-        Font = Enum.Font.Gotham,
-        BorderSizePixel = 0
+        Font = Enum.Font.SourceSans,
+        AutoButtonColor = false
     })
     
-    Create("UICorner", {Parent = btn, CornerRadius = UDim.new(0, 4)})
+    b.MouseEnter:Connect(function() b.BackgroundColor3 = C.ButtonHovered end)
+    b.MouseLeave:Connect(function() b.BackgroundColor3 = C.Button end)
+    b.MouseButton1Down:Connect(function() b.BackgroundColor3 = C.ButtonActive end)
+    b.MouseButton1Up:Connect(function() b.BackgroundColor3 = C.ButtonHovered end)
+    b.MouseButton1Click:Connect(function() if cb then cb() end end)
     
-    btn.MouseEnter:Connect(function() Tween(btn, {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}) end)
-    btn.MouseLeave:Connect(function() Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}) end)
-    btn.MouseButton1Click:Connect(function()
-        Tween(btn, {BackgroundColor3 = Color3.fromRGB(60, 120, 220)}, 0.1)
-        wait(0.1)
-        Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}, 0.1)
-        if callback then callback() end
-    end)
-    
-    window.Content.CanvasSize = UDim2.new(0, 0, 0, window.Content.UIListLayout.AbsoluteContentSize.Y)
-    return btn
+    w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    return b
 end
 
-function Isozine:Toggle(window, text, default, callback)
-    local container = Create("Frame", {
-        Parent = window.Content,
-        Size = UDim2.new(1, -10, 0, 30),
-        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-        BorderSizePixel = 0
-    })
-    
-    Create("UICorner", {Parent = container, CornerRadius = UDim.new(0, 4)})
-    
-    local label = Create("TextLabel", {
-        Parent = container,
-        Size = UDim2.new(1, -40, 1, 0),
-        Position = UDim2.new(0, 10, 0, 0),
+function Lib:Checkbox(w, txt, def, cb)
+    local f = Inst("Frame", {
+        Parent = w.C,
+        Size = UDim2.new(1, -8, 0, 19),
         BackgroundTransparency = 1,
-        Text = text,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
+        BorderSizePixel = 0
+    })
+    
+    local box = Inst("Frame", {
+        Parent = f,
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(0, 0, 0.5, -8),
+        BackgroundColor3 = C.FrameBg,
+        BorderColor3 = C.Border,
+        BorderSizePixel = 1
+    })
+    
+    local check = Inst("TextLabel", {
+        Parent = box,
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "",
+        TextColor3 = C.CheckMark,
+        TextSize = 18,
+        Font = Enum.Font.SourceSansBold
+    })
+    
+    Inst("TextLabel", {
+        Parent = f,
+        Size = UDim2.new(1, -20, 1, 0),
+        Position = UDim2.new(0, 20, 0, 0),
+        BackgroundTransparency = 1,
+        Text = txt,
+        TextColor3 = C.Text,
         TextSize = 13,
-        Font = Enum.Font.Gotham,
+        Font = Enum.Font.SourceSans,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
-    local toggle = Create("Frame", {
-        Parent = container,
-        Size = UDim2.new(0, 40, 0, 20),
-        Position = UDim2.new(1, -45, 0.5, -10),
-        BackgroundColor3 = default and Color3.fromRGB(60, 120, 220) or Color3.fromRGB(60, 60, 60),
-        BorderSizePixel = 0
-    })
+    local state = def or false
+    check.Text = state and "✓" or ""
     
-    Create("UICorner", {Parent = toggle, CornerRadius = UDim.new(1, 0)})
-    
-    local knob = Create("Frame", {
-        Parent = toggle,
-        Size = UDim2.new(0, 16, 0, 16),
-        Position = default and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BorderSizePixel = 0
-    })
-    
-    Create("UICorner", {Parent = knob, CornerRadius = UDim.new(1, 0)})
-    
-    local state = default or false
-    local btn = Create("TextButton", {
-        Parent = container,
+    local btn = Inst("TextButton", {
+        Parent = f,
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
         Text = ""
     })
     
+    btn.MouseEnter:Connect(function() box.BackgroundColor3 = C.FrameBgHovered end)
+    btn.MouseLeave:Connect(function() box.BackgroundColor3 = C.FrameBg end)
     btn.MouseButton1Click:Connect(function()
         state = not state
-        Tween(toggle, {BackgroundColor3 = state and Color3.fromRGB(60, 120, 220) or Color3.fromRGB(60, 60, 60)})
-        Tween(knob, {Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)})
-        if callback then callback(state) end
+        check.Text = state and "✓" or ""
+        if cb then cb(state) end
     end)
     
-    window.Content.CanvasSize = UDim2.new(0, 0, 0, window.Content.UIListLayout.AbsoluteContentSize.Y)
-    return {State = state, Element = container}
+    w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    return {S = state, E = f}
 end
 
-function Isozine:Slider(window, text, min, max, default, callback)
-    local container = Create("Frame", {
-        Parent = window.Content,
-        Size = UDim2.new(1, -10, 0, 50),
-        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+function Lib:SliderInt(w, txt, min, max, def, cb)
+    local f = Inst("Frame", {
+        Parent = w.C,
+        Size = UDim2.new(1, -8, 0, 38),
+        BackgroundTransparency = 1,
         BorderSizePixel = 0
     })
     
-    Create("UICorner", {Parent = container, CornerRadius = UDim.new(0, 4)})
-    
-    local label = Create("TextLabel", {
-        Parent = container,
-        Size = UDim2.new(1, -20, 0, 20),
-        Position = UDim2.new(0, 10, 0, 5),
+    local lbl = Inst("TextLabel", {
+        Parent = f,
+        Size = UDim2.new(1, 0, 0, 14),
         BackgroundTransparency = 1,
-        Text = text .. ": " .. tostring(default),
-        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Text = txt,
+        TextColor3 = C.Text,
         TextSize = 13,
-        Font = Enum.Font.Gotham,
+        Font = Enum.Font.SourceSans,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
-    local sliderBg = Create("Frame", {
-        Parent = container,
-        Size = UDim2.new(1, -20, 0, 4),
-        Position = UDim2.new(0, 10, 1, -15),
-        BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+    local frame = Inst("Frame", {
+        Parent = f,
+        Size = UDim2.new(1, 0, 0, 19),
+        Position = UDim2.new(0, 0, 0, 19),
+        BackgroundColor3 = C.FrameBg,
         BorderSizePixel = 0
     })
     
-    Create("UICorner", {Parent = sliderBg, CornerRadius = UDim.new(1, 0)})
-    
-    local sliderFill = Create("Frame", {
-        Parent = sliderBg,
-        Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(60, 120, 220),
+    local fill = Inst("Frame", {
+        Parent = frame,
+        Size = UDim2.new((def - min) / (max - min), 0, 1, 0),
+        BackgroundColor3 = C.SliderGrab,
         BorderSizePixel = 0
     })
     
-    Create("UICorner", {Parent = sliderFill, CornerRadius = UDim.new(1, 0)})
+    local val = Inst("TextLabel", {
+        Parent = frame,
+        Size = UDim2.new(1, -4, 1, 0),
+        Position = UDim2.new(0, 4, 0, 0),
+        BackgroundTransparency = 1,
+        Text = tostring(def),
+        TextColor3 = C.Text,
+        TextSize = 12,
+        Font = Enum.Font.SourceSans,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
     
-    local value = default
-    local dragging = false
+    local v = def
+    local drag = false
     
-    sliderBg.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
+    frame.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            drag = true
+            frame.BackgroundColor3 = C.FrameBgActive
         end
     end)
     
-    UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
+    UIS.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            drag = false
+            frame.BackgroundColor3 = C.FrameBg
         end
     end)
     
     RS.RenderStepped:Connect(function()
-        if dragging then
-            local mousePos = UIS:GetMouseLocation().X
-            local relativePos = math.clamp((mousePos - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
-            value = math.floor(min + (max - min) * relativePos)
-            sliderFill.Size = UDim2.new(relativePos, 0, 1, 0)
-            label.Text = text .. ": " .. tostring(value)
-            if callback then callback(value) end
+        if drag then
+            local mp = UIS:GetMouseLocation().X
+            local rp = math.clamp((mp - frame.AbsolutePosition.X) / frame.AbsoluteSize.X, 0, 1)
+            v = math.floor(min + (max - min) * rp)
+            fill.Size = UDim2.new(rp, 0, 1, 0)
+            val.Text = tostring(v)
+            if cb then cb(v) end
         end
     end)
     
-    window.Content.CanvasSize = UDim2.new(0, 0, 0, window.Content.UIListLayout.AbsoluteContentSize.Y)
-    return {Value = value, Element = container}
+    w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    return {V = v, E = f}
 end
 
-function Isozine:TextBox(window, text, placeholder, callback)
-    local container = Create("Frame", {
-        Parent = window.Content,
-        Size = UDim2.new(1, -10, 0, 30),
-        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+function Lib:InputText(w, txt, placeholder, cb)
+    local f = Inst("Frame", {
+        Parent = w.C,
+        Size = UDim2.new(1, -8, 0, 19),
+        BackgroundTransparency = 1,
         BorderSizePixel = 0
     })
     
-    Create("UICorner", {Parent = container, CornerRadius = UDim.new(0, 4)})
-    
-    local label = Create("TextLabel", {
-        Parent = container,
-        Size = UDim2.new(0, 80, 1, 0),
-        Position = UDim2.new(0, 10, 0, 0),
+    Inst("TextLabel", {
+        Parent = f,
+        Size = UDim2.new(0, 100, 1, 0),
         BackgroundTransparency = 1,
-        Text = text,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Text = txt,
+        TextColor3 = C.Text,
         TextSize = 13,
-        Font = Enum.Font.Gotham,
+        Font = Enum.Font.SourceSans,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
-    local box = Create("TextBox", {
-        Parent = container,
-        Size = UDim2.new(1, -100, 0, 24),
-        Position = UDim2.new(0, 90, 0.5, -12),
-        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+    local tb = Inst("TextBox", {
+        Parent = f,
+        Size = UDim2.new(1, -105, 0, 19),
+        Position = UDim2.new(0, 105, 0, 0),
+        BackgroundColor3 = C.FrameBg,
+        BorderSizePixel = 0,
         Text = "",
         PlaceholderText = placeholder or "",
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        PlaceholderColor3 = Color3.fromRGB(150, 150, 150),
-        TextSize = 12,
-        Font = Enum.Font.Gotham,
-        BorderSizePixel = 0
+        TextColor3 = C.Text,
+        PlaceholderColor3 = C.TextDisabled,
+        TextSize = 13,
+        Font = Enum.Font.SourceSans,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ClearTextOnFocus = false
     })
     
-    Create("UICorner", {Parent = box, CornerRadius = UDim.new(0, 4)})
+    Inst("UIPadding", {Parent = tb, PaddingLeft = UDim.new(0, 4)})
     
-    box.FocusLost:Connect(function(enter)
-        if enter and callback then callback(box.Text) end
+    tb.FocusLost:Connect(function(e)
+        if e and cb then cb(tb.Text) end
     end)
     
-    window.Content.CanvasSize = UDim2.new(0, 0, 0, window.Content.UIListLayout.AbsoluteContentSize.Y)
-    return {Element = container, TextBox = box}
+    w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    return {E = f, T = tb}
 end
 
-function Isozine:Label(window, text)
-    local label = Create("TextLabel", {
-        Parent = window.Content,
-        Size = UDim2.new(1, -10, 0, 25),
+function Lib:Text(w, txt)
+    local l = Inst("TextLabel", {
+        Parent = w.C,
+        Size = UDim2.new(1, -8, 0, 14),
         BackgroundTransparency = 1,
-        Text = text,
-        TextColor3 = Color3.fromRGB(200, 200, 200),
+        Text = txt,
+        TextColor3 = C.Text,
         TextSize = 13,
-        Font = Enum.Font.Gotham,
+        Font = Enum.Font.SourceSans,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextWrapped = true
     })
     
-    window.Content.CanvasSize = UDim2.new(0, 0, 0, window.Content.UIListLayout.AbsoluteContentSize.Y)
-    return label
+    w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    return l
 end
 
-function Isozine:Separator(window)
-    local sep = Create("Frame", {
-        Parent = window.Content,
-        Size = UDim2.new(1, -10, 0, 1),
-        BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+function Lib:Separator(w)
+    local s = Inst("Frame", {
+        Parent = w.C,
+        Size = UDim2.new(1, -8, 0, 1),
+        BackgroundColor3 = C.Separator,
         BorderSizePixel = 0
     })
     
-    window.Content.CanvasSize = UDim2.new(0, 0, 0, window.Content.UIListLayout.AbsoluteContentSize.Y)
-    return sep
+    w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    return s
 end
 
-return Isozine
+function Lib:SameLine() end
+
+function Lib:Spacing(w)
+    local s = Inst("Frame", {
+        Parent = w.C,
+        Size = UDim2.new(1, 0, 0, 4),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0
+    })
+    
+    w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    return s
+end
+
+function Lib:CollapsingHeader(w, txt, def)
+    local f = Inst("Frame", {
+        Parent = w.C,
+        Size = UDim2.new(1, -8, 0, 22),
+        BackgroundColor3 = C.Header,
+        BorderSizePixel = 0
+    })
+    
+    local arrow = Inst("TextLabel", {
+        Parent = f,
+        Size = UDim2.new(0, 16, 1, 0),
+        BackgroundTransparency = 1,
+        Text = def and "▼" or "▶",
+        TextColor3 = C.Text,
+        TextSize = 11,
+        Font = Enum.Font.SourceSansBold
+    })
+    
+    Inst("TextLabel", {
+        Parent = f,
+        Size = UDim2.new(1, -20, 1, 0),
+        Position = UDim2.new(0, 20, 0, 0),
+        BackgroundTransparency = 1,
+        Text = txt,
+        TextColor3 = C.Text,
+        TextSize = 13,
+        Font = Enum.Font.SourceSansBold,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+    
+    local cont = Inst("Frame", {
+        Parent = w.C,
+        Size = UDim2.new(1, -8, 0, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Visible = def or false
+    })
+    
+    Inst("UIListLayout", {Parent = cont, Padding = UDim.new(0, 4)})
+    
+    local open = def or false
+    
+    local btn = Inst("TextButton", {
+        Parent = f,
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Text = ""
+    })
+    
+    btn.MouseEnter:Connect(function() f.BackgroundColor3 = C.HeaderHovered end)
+    btn.MouseLeave:Connect(function() f.BackgroundColor3 = C.Header end)
+    btn.MouseButton1Click:Connect(function()
+        open = not open
+        arrow.Text = open and "▼" or "▶"
+        cont.Visible = open
+        w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    end)
+    
+    w.C.CanvasSize = UDim2.new(0, 0, 0, w.C.UIListLayout.AbsoluteContentSize.Y)
+    return {E = f, C = cont, O = open}
+end
+
+return Lib
