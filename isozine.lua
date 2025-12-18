@@ -68,6 +68,7 @@ mainFrame.InputBegan:Connect(function(input)
 		dragging = true
 		dragStart = input.Position
 		frameStart = mainFrame.Position
+		input:Consume()
 	end
 end)
 
@@ -406,8 +407,8 @@ function Library:CreateTab(title, icon)
 		labelText.Parent = row
 
 		local toggleButton = Instance.new("TextButton")
-		toggleButton.Size = UDim2.new(0, 36, 0, 20)
-		toggleButton.Position = UDim2.new(1, -100, 0.5, -10)
+		toggleButton.Size = UDim2.new(0, 30, 0, 16)
+		toggleButton.Position = UDim2.new(1, -85, 0.5, -8)
 		toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 		toggleButton.BorderSizePixel = 0
 		toggleButton.Text = ""
@@ -426,8 +427,8 @@ function Library:CreateTab(title, icon)
 		toggleShadow.Parent = toggleButton
 
 		local knob = Instance.new("Frame")
-		knob.Size = UDim2.new(0, 14, 0, 14)
-		knob.Position = UDim2.new(0, 3, 0.5, -7)
+	knob.Size = UDim2.new(0, 11, 0, 11)
+	knob.Position = UDim2.new(0, 2, 0.5, -5.5)
 		knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		knob.BorderSizePixel = 0
 		knob.Parent = toggleButton
@@ -568,9 +569,7 @@ function Library:CreateTab(title, icon)
 		thumb.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				dragging = true
-			end
-		end)
-
+			input:Consume()
 		thumb.InputEnded:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				dragging = false
@@ -581,10 +580,7 @@ function Library:CreateTab(title, icon)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				dragging = true
 				updateSlider(input)
-			end
-		end)
-
-		UserInputService.InputChanged:Connect(function(input)
+			input:Consume()
 			if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 				updateSlider(input)
 			end
@@ -865,6 +861,65 @@ function Library:SelectTab(tabData)
 	TweenService:Create(tabData.Button:FindFirstChildOfClass("ImageLabel"), TweenInfo.new(0.15), {ImageTransparency = 0}):Play()
 
 	self.CurrentTab = tabData
+end
+
+function Library:Notify(title, text, duration)
+	duration = duration or 3
+	
+	local notifContainer = Instance.new("Frame")
+	notifContainer.Size = UDim2.new(0, 280, 0, 0)
+	notifContainer.Position = UDim2.new(0.5, -140, 0, 15)
+	notifContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	notifContainer.BorderSizePixel = 0
+	notifContainer.Parent = screenGui
+	
+	local notifCorner = Instance.new("UICorner")
+	notifCorner.CornerRadius = UDim.new(0, 10)
+	notifCorner.Parent = notifContainer
+	
+	local notifStroke = Instance.new("UIStroke")
+	notifStroke.Color = Color3.fromRGB(91, 124, 255)
+	notifStroke.Thickness = 1
+	notifStroke.Transparency = 0.5
+	notifStroke.Parent = notifContainer
+	
+	local notifPadding = Instance.new("UIPadding")
+	notifPadding.PaddingTop = UDim.new(0, 12)
+	notifPadding.PaddingBottom = UDim.new(0, 12)
+	notifPadding.PaddingLeft = UDim.new(0, 16)
+	notifPadding.PaddingRight = UDim.new(0, 16)
+	notifPadding.Parent = notifContainer
+	
+	local notifTitle = Instance.new("TextLabel")
+	notifTitle.Size = UDim2.new(1, 0, 0, 16)
+	notifTitle.BackgroundTransparency = 1
+	notifTitle.Text = title
+	notifTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	notifTitle.TextSize = 12
+	notifTitle.Font = Enum.Font.GothamBold
+	notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+	notifTitle.Parent = notifContainer
+	
+	local notifText = Instance.new("TextLabel")
+	notifText.Size = UDim2.new(1, 0, 0, 35)
+	notifText.Position = UDim2.new(0, 0, 0, 18)
+	notifText.BackgroundTransparency = 1
+	notifText.Text = text
+	notifText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	notifText.TextTransparency = 0.5
+	notifText.TextSize = 10
+	notifText.Font = Enum.Font.Gotham
+	notifText.TextXAlignment = Enum.TextXAlignment.Left
+	notifText.TextWrapped = true
+	notifText.Parent = notifContainer
+	
+	TweenService:Create(notifContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 280, 0, 70)}):Play()
+	
+	task.wait(duration)
+	
+	TweenService:Create(notifContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 280, 0, 0)}):Play()
+	task.wait(0.3)
+	notifContainer:Destroy()
 end
 
 return Library
