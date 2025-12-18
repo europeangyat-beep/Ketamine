@@ -575,7 +575,7 @@ function Library:CreateTab(title, icon)
 				dragging = false
 			end
 		end)
-
+    )
 		track.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				dragging = true
