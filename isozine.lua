@@ -1,3 +1,6 @@
+-- This file was generated from main_fixed.lua - the working version
+-- The Notify function is now properly included and scoped
+
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -381,7 +384,7 @@ function Library:CreateTab(title, icon)
 		local section = tabData.CurrentSection or container
 
 		local row = Instance.new("Frame")
-		row.Size = UDim2.new(1, 0, 0, 35)
+		row.Size = UDim2.new(1, 0, 0, 45)
 		row.BackgroundTransparency = 1
 		row.LayoutOrder = #section:GetChildren()
 		row.Parent = section
@@ -427,8 +430,8 @@ function Library:CreateTab(title, icon)
 		toggleShadow.Parent = toggleButton
 
 		local knob = Instance.new("Frame")
-		knob.Size = UDim2.new(0, 11, 0, 11)
-		knob.Position = UDim2.new(0, 2, 0.5, -5.5)
+	knob.Size = UDim2.new(0, 11, 0, 11)
+	knob.Position = UDim2.new(0, 2, 0.5, -5.5)
 		knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		knob.BorderSizePixel = 0
 		knob.Parent = toggleButton
@@ -453,14 +456,14 @@ function Library:CreateTab(title, icon)
 					BackgroundColor3 = Color3.fromRGB(91, 124, 255)
 				}):Play()
 				TweenService:Create(knob, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-					Position = UDim2.new(1, -13, 0.5, -5.5)
+					Position = UDim2.new(1, -17, 0.5, -7)
 				}):Play()
 			else
 				TweenService:Create(toggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
 					BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 				}):Play()
 				TweenService:Create(knob, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-					Position = UDim2.new(0, 2, 0.5, -5.5)
+					Position = UDim2.new(0, 3, 0.5, -7)
 				}):Play()
 			end
 
@@ -474,13 +477,13 @@ function Library:CreateTab(title, icon)
 		local section = tabData.CurrentSection or container
 
 		local sliderContainer = Instance.new("Frame")
-		sliderContainer.Size = UDim2.new(1, 0, 0, 38)
+		sliderContainer.Size = UDim2.new(1, 0, 0, 50)
 		sliderContainer.BackgroundTransparency = 1
 		sliderContainer.LayoutOrder = #section:GetChildren()
 		sliderContainer.Parent = section
 
 		local sliderHeader = Instance.new("Frame")
-		sliderHeader.Size = UDim2.new(1, 0, 0, 15)
+		sliderHeader.Size = UDim2.new(1, 0, 0, 20)
 		sliderHeader.BackgroundTransparency = 1
 		sliderHeader.Parent = sliderContainer
 
@@ -490,7 +493,7 @@ function Library:CreateTab(title, icon)
 		sliderLabel.Text = label
 		sliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		sliderLabel.TextTransparency = 0.15
-		sliderLabel.TextSize = 11
+		sliderLabel.TextSize = 13
 		sliderLabel.Font = Enum.Font.Gotham
 		sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
 		sliderLabel.Parent = sliderHeader
@@ -502,20 +505,20 @@ function Library:CreateTab(title, icon)
 		sliderValue.Text = tostring(default)
 		sliderValue.TextColor3 = Color3.fromRGB(255, 255, 255)
 		sliderValue.TextTransparency = 0.5
-		sliderValue.TextSize = 10
+		sliderValue.TextSize = 12
 		sliderValue.Font = Enum.Font.Gotham
 		sliderValue.TextXAlignment = Enum.TextXAlignment.Right
 		sliderValue.Parent = sliderHeader
 
 		local trackFrame = Instance.new("Frame")
-		trackFrame.Size = UDim2.new(1, -20, 0, 15)
-		trackFrame.Position = UDim2.new(0, 10, 0, 22)
+		trackFrame.Size = UDim2.new(1, -20, 0, 20)
+		trackFrame.Position = UDim2.new(0, 10, 0, 30)
 		trackFrame.BackgroundTransparency = 1
 		trackFrame.Parent = sliderContainer
 
 		local track = Instance.new("Frame")
-		track.Size = UDim2.new(1, 0, 0, 3)
-		track.Position = UDim2.new(0, 0, 0.5, -1.5)
+		track.Size = UDim2.new(1, 0, 0, 4)
+		track.Position = UDim2.new(0, 0, 0.5, -2)
 		track.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 		track.BorderSizePixel = 0
 		track.Parent = trackFrame
@@ -535,8 +538,8 @@ function Library:CreateTab(title, icon)
 		fillCorner.Parent = fill
 
 		local thumb = Instance.new("Frame")
-		thumb.Size = UDim2.new(0, 10, 0, 10)
-		thumb.Position = UDim2.new((default - min) / (max - min), -5, 0.5, -5)
+		thumb.Size = UDim2.new(0, 14, 0, 14)
+		thumb.Position = UDim2.new((default - min) / (max - min), -7, 0.5, -7)
 		thumb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		thumb.BorderSizePixel = 0
 		thumb.Parent = trackFrame
@@ -548,7 +551,7 @@ function Library:CreateTab(title, icon)
 		local thumbShadow = Instance.new("UIStroke")
 		thumbShadow.Color = Color3.fromRGB(0, 0, 0)
 		thumbShadow.Transparency = 0.7
-		thumbShadow.Thickness = 1
+		thumbShadow.Thickness = 2
 		thumbShadow.Parent = thumb
 
 		local dragging = false
@@ -558,7 +561,7 @@ function Library:CreateTab(title, icon)
 			local value = math.floor(min + (max - min) * pos)
 
 			fill.Size = UDim2.new(pos, 0, 1, 0)
-			thumb.Position = UDim2.new(pos, -5, 0.5, -5)
+			thumb.Position = UDim2.new(pos, -7, 0.5, -7)
 			sliderValue.Text = tostring(value)
 
 			if callback then
@@ -590,12 +593,6 @@ function Library:CreateTab(title, icon)
 		UserInputService.InputChanged:Connect(function(input)
 			if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 				updateSlider(input)
-			end
-		end)
-
-		UserInputService.InputEnded:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				dragging = false
 			end
 		end)
 	end
@@ -796,7 +793,7 @@ function Library:CreateTab(title, icon)
 		local section = tabData.CurrentSection or container
 
 		local button = Instance.new("TextButton")
-		button.Size = UDim2.new(1, 0, 0, 35)
+		button.Size = UDim2.new(1, 0, 0, 47)
 		button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		button.BackgroundTransparency = 0.97
 		button.BorderSizePixel = 0
@@ -810,30 +807,30 @@ function Library:CreateTab(title, icon)
 		buttonCorner.Parent = button
 
 		local buttonLabel = Instance.new("TextLabel")
-		buttonLabel.Size = UDim2.new(1, -40, 1, 0)
-		buttonLabel.Position = UDim2.new(0, 12, 0, 0)
+		buttonLabel.Size = UDim2.new(1, -50, 1, 0)
+		buttonLabel.Position = UDim2.new(0, 16, 0, 0)
 		buttonLabel.BackgroundTransparency = 1
 		buttonLabel.Text = label
 		buttonLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		buttonLabel.TextTransparency = 0.15
-		buttonLabel.TextSize = 12
+		buttonLabel.TextSize = 13
 		buttonLabel.Font = Enum.Font.Gotham
 		buttonLabel.TextXAlignment = Enum.TextXAlignment.Left
 		buttonLabel.Parent = button
 
 		local arrow = Instance.new("TextLabel")
 		arrow.Size = UDim2.new(0, 20, 1, 0)
-		arrow.Position = UDim2.new(1, -25, 0, 0)
+		arrow.Position = UDim2.new(1, -30, 0, 0)
 		arrow.BackgroundTransparency = 1
 		arrow.Text = "›"
 		arrow.TextColor3 = Color3.fromRGB(255, 255, 255)
 		arrow.TextTransparency = 0.7
-		arrow.TextSize = 12
+		arrow.TextSize = 14
 		arrow.Font = Enum.Font.Gotham
 		arrow.Parent = button
 
 		local spacer = Instance.new("Frame")
-		spacer.Size = UDim2.new(1, 0, 0, 4)
+		spacer.Size = UDim2.new(1, 0, 0, 8)
 		spacer.BackgroundTransparency = 1
 		spacer.LayoutOrder = #section:GetChildren() + 1
 		spacer.Parent = section
@@ -855,7 +852,6 @@ function Library:CreateTab(title, icon)
 
 	return TabAPI
 end
-
 function Library:SelectTab(tabData)
 	for _, tab in ipairs(self.Tabs) do
 		tab.Container.Visible = false
