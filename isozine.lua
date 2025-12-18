@@ -867,7 +867,4 @@ function Library:SelectTab(tabData)
 	self.CurrentTab = tabData
 end
 
--- Ensure mainFrame is visible on startup
-mainFrame.Visible = true
-
 return Library
