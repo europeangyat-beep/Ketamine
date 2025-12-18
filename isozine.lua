@@ -67,8 +67,7 @@ local dragStart = nil
 local frameStart = nil
 
 mainFrame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
+		if input.UserInputType == Enum.UserInputType.MouseButton1 and not _G.SliderDragging then
 		dragStart = input.Position
 		frameStart = mainFrame.Position
 		input:Consume()
@@ -504,8 +503,8 @@ function Library:CreateTab(title, icon)
 		sliderValue.Parent = sliderHeader
 
 		local trackFrame = Instance.new("Frame")
-		trackFrame.Size = UDim2.new(1, -40, 0, 12)
-		trackFrame.Position = UDim2.new(0, 20, 0, 18)
+		trackFrame.Size = UDim2.new(1, -80, 0, 12)
+		trackFrame.Position = UDim2.new(0, 40, 0, 18)
 		trackFrame.BackgroundTransparency = 1
 		trackFrame.Parent = sliderContainer
 
@@ -564,14 +563,15 @@ function Library:CreateTab(title, icon)
 
 		thumb.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				_G.SliderDragging = true
 				dragging = true
 				input:Consume()
-				mainFrame.InputBegan:Disconnect()
 			end
 		end)
 
 		thumb.InputEnded:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				_G.SliderDragging = false
 				dragging = false
 			end
 		end)
