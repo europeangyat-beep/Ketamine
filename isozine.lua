@@ -504,8 +504,8 @@ function Library:CreateTab(title, icon)
 		sliderValue.Parent = sliderHeader
 
 		local trackFrame = Instance.new("Frame")
-		trackFrame.Size = UDim2.new(1, -20, 0, 12)
-		trackFrame.Position = UDim2.new(0, 10, 0, 18)
+		trackFrame.Size = UDim2.new(1, -40, 0, 12)
+		trackFrame.Position = UDim2.new(0, 20, 0, 18)
 		trackFrame.BackgroundTransparency = 1
 		trackFrame.Parent = sliderContainer
 
@@ -566,6 +566,7 @@ function Library:CreateTab(title, icon)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				dragging = true
 				input:Consume()
+				mainFrame.InputBegan:Disconnect()
 			end
 		end)
 
