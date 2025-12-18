@@ -867,10 +867,7 @@ function Library:SelectTab(tabData)
 	self.CurrentTab = tabData
 end
 
--- Update header title
-local headerTitle = screenGui.Parent.PlutoniumUI.mainFrame:FindFirstChildOfClass("Frame"):FindFirstChildOfClass("TextLabel")
-if headerTitle then
-	headerTitle.Text = "Plutonium"
-end
+-- Ensure mainFrame is visible on startup
+mainFrame.Visible = true
 
 return Library
