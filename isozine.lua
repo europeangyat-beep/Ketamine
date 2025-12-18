@@ -422,13 +422,6 @@ function Library:CreateTab(title, icon)
 		toggleCorner.CornerRadius = UDim.new(0.5, 0)
 		toggleCorner.Parent = toggleButton
 
-		local toggleShadow = Instance.new("UIStroke")
-		toggleShadow.Color = Color3.fromRGB(0, 0, 0)
-		toggleShadow.Transparency = 0.6
-		toggleShadow.Thickness = 1
-		toggleShadow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		toggleShadow.Parent = toggleButton
-
 		local knob = Instance.new("Frame")
 	knob.Size = UDim2.new(0, 11, 0, 11)
 	knob.Position = UDim2.new(0, 2, 0.5, -5.5)
@@ -477,13 +470,13 @@ function Library:CreateTab(title, icon)
 		local section = tabData.CurrentSection or container
 
 		local sliderContainer = Instance.new("Frame")
-		sliderContainer.Size = UDim2.new(1, 0, 0, 50)
+		sliderContainer.Size = UDim2.new(1, 0, 0, 35)
 		sliderContainer.BackgroundTransparency = 1
 		sliderContainer.LayoutOrder = #section:GetChildren()
 		sliderContainer.Parent = section
 
 		local sliderHeader = Instance.new("Frame")
-		sliderHeader.Size = UDim2.new(1, 0, 0, 20)
+		sliderHeader.Size = UDim2.new(1, 0, 0, 15)
 		sliderHeader.BackgroundTransparency = 1
 		sliderHeader.Parent = sliderContainer
 
@@ -493,7 +486,7 @@ function Library:CreateTab(title, icon)
 		sliderLabel.Text = label
 		sliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		sliderLabel.TextTransparency = 0.15
-		sliderLabel.TextSize = 13
+		sliderLabel.TextSize = 11
 		sliderLabel.Font = Enum.Font.Gotham
 		sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
 		sliderLabel.Parent = sliderHeader
@@ -505,14 +498,14 @@ function Library:CreateTab(title, icon)
 		sliderValue.Text = tostring(default)
 		sliderValue.TextColor3 = Color3.fromRGB(255, 255, 255)
 		sliderValue.TextTransparency = 0.5
-		sliderValue.TextSize = 12
+		sliderValue.TextSize = 10
 		sliderValue.Font = Enum.Font.Gotham
 		sliderValue.TextXAlignment = Enum.TextXAlignment.Right
 		sliderValue.Parent = sliderHeader
 
 		local trackFrame = Instance.new("Frame")
-		trackFrame.Size = UDim2.new(1, -20, 0, 20)
-		trackFrame.Position = UDim2.new(0, 10, 0, 30)
+		trackFrame.Size = UDim2.new(1, -20, 0, 12)
+		trackFrame.Position = UDim2.new(0, 10, 0, 18)
 		trackFrame.BackgroundTransparency = 1
 		trackFrame.Parent = sliderContainer
 
@@ -593,6 +586,12 @@ function Library:CreateTab(title, icon)
 		UserInputService.InputChanged:Connect(function(input)
 			if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 				updateSlider(input)
+			end
+		end)
+
+		UserInputService.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				dragging = false
 			end
 		end)
 	end
@@ -872,7 +871,7 @@ function Library:Notify(title, text, duration)
 	
 	local notifContainer = Instance.new("Frame")
 	notifContainer.Size = UDim2.new(0, 280, 0, 0)
-	notifContainer.Position = UDim2.new(0.5, -140, 0, 15)
+	notifContainer.Position = UDim2.new(1, -300, 0, 15)
 	notifContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 	notifContainer.BorderSizePixel = 0
 	notifContainer.Parent = screenGui
